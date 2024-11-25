@@ -13,7 +13,7 @@ import ChatIcon from '@mui/icons-material/Chat'
 import server from '../environment.js';
 
 
-const server_url = server;
+const server_url = server
 var connections = {};
 const peerConfigConnections = {
   "iceServers": [
