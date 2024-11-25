@@ -8,7 +8,8 @@ export const AuthContext = createContext({});
 
 const client = axios.create({
   // baseURL: "http://localhost:4000/api/v1/auth" // Correct base URL
-  baseURL:`${server}/api/v1/auth`
+  baseURL:`${server}/api/v1/auth`,
+  withCredentials: true,
 
 });
 

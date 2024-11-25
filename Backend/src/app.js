@@ -38,13 +38,22 @@ database.connect();
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({limit:"40kb",extended:true}));
-app.use(
+const allowedOrigins = [
+    'http://localhost:3000',  // Local development frontend
+    'https://videofrontend-77zt.onrender.com'  // Deployed frontend
+  ];
+  
+  // Use the dynamic origins in the CORS middleware
+  app.use(
     cors({
-      origin: [
-        "http://localhost:3000",  // Local frontend
-        "https://videofrontend-77zt.onrender.com",  // Deployed frontend
-      ],
-      credentials: true,
+      origin: function (origin, callback) {
+        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+          callback(null, true);  // Allow the request
+        } else {
+          callback(new Error('Not allowed by CORS'));  // Reject the request
+        }
+      },
+      credentials: true,  // If you're using cookies or session-based authentication
     })
   );
 
