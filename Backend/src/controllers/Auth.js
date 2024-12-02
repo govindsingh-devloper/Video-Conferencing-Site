@@ -85,7 +85,12 @@ exports.login=async(req,res)=>{
            return res.status(200).json({
             success:true,
             message:"User Login SuccessFully",
-            token:token
+            token:token,
+            user:{
+                _id: user._id,
+               username: user.username,
+              name: user.name,
+            }
            })
         }else{
             return res.status(500).json({
@@ -127,28 +132,34 @@ exports.getUserHistory=async(req,res)=>{
     }
 }
 
-exports.addToHistory=async(req,res)=>{
-    const {token,meetingCode}=req.body;
+exports.addToHistory = async (req, res) => {
+    const { token, meetingCode } = req.body;
     try {
-        const user=await User.findOne({token:token});
-        const newMeetings=new Meeting({
-            user_id:user.username,
-            meetingCode:meetingCode
-        })
-
-        await newMeetings.save();
-        return res.status(200).json({
-            success:true,
-            message:"ADDED Code To History"
-        })
-        
+      const user = await User.findOne({ token: token });
+      console.log("User found:", user); // Make sure the user is correctly fetched
+      
+      const newMeetings = new Meeting({
+        user_id: user.username,
+        meetingCode: meetingCode
+      });
+  
+      await newMeetings.save();
+  
+      const response = {
+        success: true,
+        message: "ADDED Code To History",
+        user: user  // Include user object here
+      };
+  
+      console.log("Response:", response); // Log the response before sending
+      return res.status(200).json(response);
+  
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({
-            success:false,
-            message:error.message
-        })
-        
+      console.log(error);
+      return res.status(500).json({
+        success: false,
+        message: error.message
+      });
     }
-
-}
+  };
+  

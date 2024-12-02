@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import io from "socket.io-client";
 import { Badge, IconButton, TextField } from '@mui/material';
 import { Button } from '@mui/material';
@@ -11,6 +11,7 @@ import ScreenShareIcon from '@mui/icons-material/ScreenShare';
 import StopScreenShareIcon from '@mui/icons-material/StopScreenShare'
 import ChatIcon from '@mui/icons-material/Chat'
 import server from '../environment.js';
+import { AuthContext } from '../contexts/AuthContext.jsx';
 
 
 const server_url = server
@@ -39,6 +40,9 @@ const VideoMeet = () => {
   const [askForUsername, setAskForUsername] = useState(true);
   const [username, setUsername] = useState("");
   const [videos, setVideos] = useState([]);
+
+  const {userData}=useContext(AuthContext);
+  console.log("User Data",userData)
 
   useEffect(() => {
     console.log("HELLO")
@@ -425,152 +429,145 @@ let connect = () => {
     getMedia();
 }
 
-  return (
+return (
+  <div className="relative h-screen bg-[rgb(1,4,48)]">
+  {askForUsername === true ? (
     <div>
-      {askForUsername === true ? 
-        <div>
-       
-          <h2>Enter into Lobby</h2>
-          <div className='flex mt-4 gap-4 mb-4'>
-          <TextField
-            id="outlined-basic"
-            label="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            variant="outlined"
-          />
-          <Button variant="contained" onClick={connect}>
-            Connect
-          </Button>
-          </div>
-
-          
-          
-
-          <div>
-            <video ref={localVideoref} autoPlay muted />
-          </div>
-        </div>
-      : 
-       <div className='relative h-screen  bg-[rgb(1,4,48)]'>
-                     {/* //Chat */}
-       {showModal ? <div className='absolute h-[90vh] right-0 bg-white rounded-lg w-[30vw] px-5'>
-
-             <div className='relative h-full'>
-                     <h1>Chat</h1>
-
-                     {/* //Chatting display */}
-                     <div className=''>
-                     { messages.length >0 ?
-                        messages.map((item,index)=>(
-                            <div key={index} className='mb-2'>
-                                <p className='font-bold'>{item.sender}</p>
-                                <p className=''>{item.data}</p>
-
-                            </div>
-                        )) :
-                        <p>No Messages yet</p>
-                     }
-
-                     </div>
-                     {/* //chattextField */}
-                     <div className=' flex absolute bottom-0 mb-2 gap-4'>
-                     <TextField
-                     value={message} 
-                     onChange={e=>setMessage(e.target.value)}
-                     id='outlined-basic' label="Enter your message"/>
-                     <Button variant='contained'
-                     onClick={sendMessage}
-                     >Send</Button>
-                     </div>
-                    
-             </div>
-      
-        </div>
-        :<></> 
-}
-       {/* //Buttons */}
-
-      <div className='flex justify-center items-end h-screen'>
-           <IconButton 
-            onClick={handleVideo} 
-            className="text-white transform hover:scale-110 transition-transform duration-300 ease-in-out" >
-            {
-              (video === true) ? <VideocamIcon className="text-white transform scale-110"/> : <VideocamOffIcon className="text-white transform scale-110"/>
-            }
-           </IconButton>
-
-           <IconButton 
-           onClick={handleEndCall}
-           className='text-white'>
-                  <CallEndIcon className='text-white'/>
-
-           </IconButton>
-
-           <IconButton
-            onClick={handleAudio}
-             >
-            { audio ===true ? <MicIcon className='text-white'/> : <MicOffIcon className='text-white'/>}
-           </IconButton>
-
-
-           { screenAvailable === true ? 
-             <IconButton 
-              onClick={handleScreen}
-             >
-              {screen === true ? <ScreenShareIcon className='text-white'/> : <StopScreenShareIcon className='text-white'/>}
-             </IconButton>
-             :<>
-
-             </>
-           }
-
-           <Badge badgeContent={newMessages} max={999} color='secondary'>
-             <IconButton 
-             onClick={()=>setModal(!showModal)}
-             >
-                 <ChatIcon className='text-white'/>
-
-             </IconButton>
-
-           </Badge>
-           
-
+      <h2 className='text-white'>Enter into Lobby</h2>
+      <div className="flex mt-4 gap-4 mb-4 text-white border-white">
+        <TextField
+          id="outlined-basic"
+          label="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          variant="outlined"
+        />
+        <Button variant="contained" onClick={connect}>
+          Connect
+        </Button>
       </div>
-        <video className='absolute bottom-[100px] h-[20vh] w-auto left-0  rounded-[20px]'
-        ref={localVideoref} autoPlay muted> </video>
-      
-       <div className='flex p-10 gap-10'>
 
-       {
-          videos.map((video)=>(
-            <div  
-            key={video.socketId}>
-               <h2>{video.socketId}</h2>
-
-               <video 
-               className='w'
-               data-socket={video.socketId}
-               ref={ref=>{
-                if(ref && video.stream){
-                  ref.srcObject=video.stream
-                }
-               }}
-               autoPlay
-               ></video>
-
-            </div>
-          ))
-        }
-       </div>
-        
-       </div>
-
-
-        
-      }
+      <div>
+        <video ref={localVideoref} autoPlay muted />
+      </div>
     </div>
+  ) : (
+    <div className="relative h-screen bg-[rgb(1,4,48)]">
+      {/* Chat */}
+      {showModal ? (
+        <div className="absolute h-[90vh] right-0 bg-white rounded-lg w-[30vw] px-5">
+          <div className="relative h-full">
+            <h1>Chat</h1>
+            <div>
+              {messages.length > 0 ? (
+                messages.map((item, index) => (
+                  <div key={index} className="mb-2">
+                    <p className="font-bold">{item.sender}</p>
+                    <p>{item.data}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No Messages yet</p>
+              )}
+            </div>
+            <div className="flex absolute bottom-0 mb-2 gap-4">
+              <TextField
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                id="outlined-basic"
+                label="Enter your message"
+              />
+              <Button variant="contained" onClick={sendMessage}>
+                Send
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {/* Buttons */}
+      <div className="flex justify-center items-end h-screen">
+        <IconButton
+          onClick={handleVideo}
+          className="text-white transform hover:scale-110 transition-transform duration-300 ease-in-out"
+        >
+          {video === true ? (
+            <VideocamIcon className="text-white transform scale-110" />
+          ) : (
+            <VideocamOffIcon className="text-white transform scale-110" />
+          )}
+        </IconButton>
+
+        <IconButton onClick={handleEndCall} className="text-white">
+          <CallEndIcon className="text-white" />
+        </IconButton>
+
+        <IconButton onClick={handleAudio}>
+          {audio === true ? (
+            <MicIcon className="text-white" />
+          ) : (
+            <MicOffIcon className="text-white" />
+          )}
+        </IconButton>
+
+        {screenAvailable === true ? (
+          <IconButton onClick={handleScreen}>
+            {screen === true ? (
+              <ScreenShareIcon className="text-white" />
+            ) : (
+              <StopScreenShareIcon className="text-white" />
+            )}
+          </IconButton>
+        ) : null}
+
+        <Badge badgeContent={newMessages} max={999} color="secondary">
+          <IconButton onClick={() => setModal(!showModal)}>
+            <ChatIcon className="text-white" />
+          </IconButton>
+        </Badge>
+      </div>
+
+      {/* Remote Videos - Updated to be fixed and responsive */}
+      <div className="absolute top-0 left-0 right-0 flex justify-center items-start flex-wrap gap-4 p-4">
+        {videos.map((video) => (
+          <div
+            className="flex flex-col items-center gap-2 p-2"
+            key={video.socketId}
+          >
+            <h2 className="text-white">{video.username || video.socketId}</h2>
+            <h2 className="text-white">{video.username}</h2>
+
+            <video
+              className="w-[20vw] h-[15vw] min-w-[15vw] rounded-[10px] object-cover"
+              data-socket={video.socketId}
+              ref={(ref) => {
+                if (ref && video.stream) {
+                  ref.srcObject = video.stream;
+                }
+              }}
+              autoPlay
+            ></video>
+          </div>
+        ))}
+      </div>
+
+      {/* Local Video */}
+      <div className="absolute bottom-[30px] left-[10px] w-[20vw] h-[15vw] rounded-[20px] bg-gray-900">
+        <video
+          ref={localVideoref}
+          autoPlay
+          muted
+          className="w-full h-full rounded-[20px] object-cover"
+        ></video>
+        <h2 className='text-white'>{video.name}</h2>
+      </div>
+    </div>
+  )}
+</div>
+
   );
+  
+  
 };
 
 export default VideoMeet;

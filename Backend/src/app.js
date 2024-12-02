@@ -38,24 +38,34 @@ database.connect();
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({limit:"40kb",extended:true}));
+
 const allowedOrigins = [
-    'http://localhost:3000',  // Local development frontend
-    'https://videofrontend-77zt.onrender.com'  // Deployed frontend
-  ];
-  
-  // Use the dynamic origins in the CORS middleware
-  app.use(
-    cors({
-      origin: function (origin, callback) {
-        if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
-          callback(null, true);  // Allow the request
-        } else {
-          callback(new Error('Not allowed by CORS'));  // Reject the request
-        }
-      },
-      credentials: true,  // If you're using cookies or session-based authentication
-    })
-  );
+  'http://localhost:3000', // Local frontend (during development)
+  'https://videofrontend-77zt.onrender.com', // Deployed frontend
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+        // Allow the request if the origin is valid or null (for local testing)
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow required methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Allow required headers
+    credentials: true, // Allow cookies to be sent
+  })
+);
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Credentials', 'true');
+  console.log('CORS Headers:', res.getHeaders());
+  next();
+});
+
+
 
 
 //Routes

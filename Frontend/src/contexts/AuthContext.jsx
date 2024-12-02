@@ -9,7 +9,10 @@ export const AuthContext = createContext({});
 const client = axios.create({
   // baseURL: "http://localhost:4000/api/v1/auth" // Correct base URL
   baseURL:`${server}/api/v1/auth`,
-  withCredentials: true,
+  // withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json'
+  }
 
 });
 
@@ -51,6 +54,12 @@ export const AuthProvider = ({ children }) => {
       });
 
       console.log("Login Response....",response);
+      if (response.data.success) {
+        const user = response.data.user;
+        console.log("Logged in user:", user); // Log the user details
+      } else {
+        console.error("Login failed:", response.data.message);
+      }
 
       if (response.data.success) {
         localStorage.setItem("token", response.data.token);
@@ -76,7 +85,7 @@ export const AuthProvider = ({ children }) => {
       return response;
     } catch (error) {
       console.log(error)
-      throw new Error
+      
       
     }
   }
@@ -84,15 +93,16 @@ export const AuthProvider = ({ children }) => {
   const addToUserHistory=async(meetingCode)=>{
     try {
       let response=await client.post("/add_to_activity",{
-        token:
-          localStorage.getItem("token"),
-          meetingCode:meetingCode
+        token:localStorage.getItem("token"),
+        meetingCode:meetingCode
         
       })
+      console.log("VideoJoining Response",response)
+      console.log("Response 2",response.data)
       return response;
       
     } catch (error) {
-      throw new Error
+       console.log(error.message)
       
     }
 
